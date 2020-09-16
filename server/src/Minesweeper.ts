@@ -8,6 +8,7 @@ export default class MineSweeper {
     private playerGrid: string[][];
     private size: number;
     private nbBombs: number;
+    private remainingBombs: number;
 
     constructor(size: number, nbBombs: number) {
         if (nbBombs > size * size) {
@@ -17,6 +18,7 @@ export default class MineSweeper {
         this.playerGrid = [];
         this.size = size + 2;
         this.nbBombs = nbBombs;
+        this.remainingBombs = nbBombs;
         this.generateGrid();
     }
 
@@ -44,7 +46,19 @@ export default class MineSweeper {
             throw new Error("Already visited");
         }
 
-        this.playerGrid[row][col] === '#' ? this.playerGrid[row][col] = 'F' : this.playerGrid[row][col] = '#';
+        if(this.playerGrid[row][col] === '#') {
+            // Flag cell as bomb and update remaining bombs
+            this.playerGrid[row][col] = 'F';
+            if (this.remainingBombs > 0) {
+                this.remainingBombs--;
+            }
+        } else {
+            // Unflag cell and update remaining bombs
+            this.playerGrid[row][col] = '#';
+            if (this.remainingBombs < this.nbBombs) {
+                this.remainingBombs++;
+            }
+        }
     }
 
     public getSize() {
