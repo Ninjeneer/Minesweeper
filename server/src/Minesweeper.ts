@@ -10,7 +10,7 @@ export default class MineSweeper {
     private nbBombs: number;
 
     constructor(size: number, nbBombs: number) {
-        if (nbBombs > size*size) {
+        if (nbBombs > size * size) {
             throw new Error("Too much bombs");
         }
         this.grid = [];
@@ -28,7 +28,7 @@ export default class MineSweeper {
         // Reveal cell
         this.playerGrid[row][col] = this.grid[row][col].value;
         // Mark as visited
-        this.grid[row][col].visited = true; 
+        this.grid[row][col].visited = true;
         // Visit siblings if 0
         if (this.grid[row][col].value === '0') {
             for (let i = row - 1; i <= row + 1; i++) {
@@ -37,6 +37,14 @@ export default class MineSweeper {
                 }
             }
         }
+    }
+
+    public flag(row: number, col: number) {
+        if (this.grid[row][col].visited) {
+            throw new Error("Already visited");
+        }
+
+        this.playerGrid[row][col] === '#' ? this.playerGrid[row][col] = 'F' : this.playerGrid[row][col] = '#';
     }
 
     public getSize() {
@@ -65,7 +73,7 @@ export default class MineSweeper {
         // Place bombs
         for (let i = 0; i < this.nbBombs; i++) {
             let row;
-            let col; 
+            let col;
             do {
                 row = Math.floor(Math.random() * (this.size - 2)) + 1;
                 col = Math.floor(Math.random() * (this.size - 2)) + 1;
@@ -89,7 +97,7 @@ export default class MineSweeper {
             for (let j = col - 1; j <= col + 1; j++) {
                 if (this.grid[i][j].value === 'B') {
                     value++;
-                }    
+                }
             }
         }
         this.grid[row][col].value = '' + value;
