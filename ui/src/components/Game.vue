@@ -22,7 +22,12 @@
         <div class="row">
           <div class="col-12">
             <div class="grid mx-auto">
-              <div class="cell" v-for="(cell, index) in [].concat(...grid)" :key="cell" v-on:click="pickCell(index)"></div>
+              <div 
+              class="cell" 
+              v-for="(cell, index) in [].concat(...grid)" 
+              :key="cell" 
+              v-on:click="pickCell(index)"
+              v-bind:id="'cell-' + index"></div>
             </div>
           </div>
         </div>
@@ -56,7 +61,7 @@ export default {
           const row = Math.floor(cellNumber / this.grid.length);
           const col = cellNumber % this.grid.length;
 
-          
+          document.getElementById('cell-' + cellNumber).innerText = this.grid[row][col];
       }
   }
 };
@@ -79,6 +84,9 @@ export default {
   border: 1px solid grey;
   background-color: lightgray;
   transition-duration: 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .cell:hover {
