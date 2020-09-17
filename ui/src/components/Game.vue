@@ -13,22 +13,29 @@
           <li>loan</li>
         </ul>
       </div>
-      <div class="col-12 col-sm-9 border">
+      <div class="col-12 col-sm-9 border p-3">
         <div class="row">
           <div class="col-12">
+            <div class="alert alert-success">Partie gagnée</div>
             <p>Bombes restantes : {{ grid.length + grid[0].length }}</p>
           </div>
         </div>
-        <div class="row">
-          <div class="col-12">
+        <div class="row mb-5">
+          <div class="col-12 mx-auto text-center">
             <div class="grid mx-auto">
-              <div 
-              class="cell" 
-              v-for="(cell, index) in [].concat(...grid)" 
-              :key="cell" 
-              v-on:click="pickCell(index)"
-              v-bind:id="'cell-' + index"></div>
+              <div
+                class="cell"
+                v-for="(cell, index) in [].concat(...grid)"
+                :key="cell"
+                v-on:click="pickCell(index)"
+                v-bind:id="'cell-' + index"
+              ></div>
             </div>
+          </div>
+        </div>
+        <div class="row mt-5">
+          <div class="col-12 text-right">
+            <button class="btn btn-danger" v-on:click="resetGame()">Réinitialiser la partie</button>
           </div>
         </div>
       </div>
@@ -42,28 +49,33 @@ export default {
   props: {
     pseudo: String,
   },
-  data: function() {
-      return {
-          grid: [
-              [0, 0, 0, 0, 0, 0, 0, 0],
-              [0, 0, 0, 0, 0, 0, 0, 0],
-              [0, 0, 0, 0, 0, 0, 0, 0],
-              [0, 0, 0, 0, 0, 0, 0, 0],
-              [0, 0, 0, 0, 0, 0, 0, 0],
-              [0, 0, 0, 0, 0, 0, 0, 0],
-              [0, 0, 0, 0, 0, 0, 0, 0],
-              [0, 0, 0, 0, 0, 0, 0, 0],
-          ]
-      }
+  data: function () {
+    return {
+      grid: [
+        [0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0],
+      ],
+    };
   },
   methods: {
-      pickCell: function(cellNumber) {
-          const row = Math.floor(cellNumber / this.grid.length);
-          const col = cellNumber % this.grid.length;
+    pickCell: function (cellNumber) {
+      const row = Math.floor(cellNumber / this.grid.length);
+      const col = cellNumber % this.grid.length;
 
-          document.getElementById('cell-' + cellNumber).innerText = this.grid[row][col];
-      }
-  }
+      const cell = document.getElementById("cell-" + cellNumber);
+      cell.innerText = this.grid[row][col];
+      cell.classList.add("revealed");
+    },
+    resetGame: function () {
+      const answer = confirm("Voulez-vous vraiment réinitialiser la partie ?");
+    },
+  },
 };
 </script>
 
@@ -90,11 +102,17 @@ export default {
 }
 
 .cell:hover {
-    background-color: darkgray;
-    transition-duration: 0.2s;
+  background-color: darkgray;
+  transition-duration: 0.2s;
 }
 
 .cell:active {
-    box-shadow: inset 0px 0px 5px black;
+  box-shadow: inset 0px 0px 5px black;
+}
+
+.revealed,
+.revealed:hover {
+  background-color: white;
+  font-weight: bold;
 }
 </style>
