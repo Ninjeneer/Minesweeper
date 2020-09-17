@@ -2,21 +2,19 @@
   <div id="app">
     <!-- <img alt="Vue logo" src="./assets/logo.png">
     <HelloWorld msg="Welcome to Your Vue.js App"/> -->
-    <Home />
+    <!-- <Home /> -->
+    <Game pseudo="loan"/>
 
   </div>
 </template>
 
 <script>
-import Home from './components/Home.vue'
-import Header from './components/Header.vue'
-
-
+import Game from './components/Game'
 export default {
   name: 'App',
   components: {
-    Header,
-    Home
+    // Home,
+    Game
   }
 }
 </script>
