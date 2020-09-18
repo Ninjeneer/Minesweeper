@@ -7,8 +7,6 @@ import Player from './Player';
 
 const cors = require('cors');
 
-
-
 export default class Server {
     private app;
     private server: http.Server;
@@ -22,12 +20,12 @@ export default class Server {
         this.gameController = gameController;
         this.app = express();
         this.app.use(cors());
-        this.app.use(function(req, res, next) {
+        this.app.use(function (req, res, next) {
             res.header("Access-Control-Allow-Origin", "http://localhost:8080"); // update to match the domain you will make the request from
             res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
             res.header("Access-Control-Allow-Credentials", "true");
             next();
-          });
+        });
         const server = http.createServer(this.app);
         this.server = server;
         this.io = socketIo(this.server, {
@@ -54,7 +52,11 @@ export default class Server {
                 const player = new Player(socket, data);
                 this.players.push(player);
                 console.log(`Player ${player.getPseudo()} registered !`)
-                this.broadcast('players', this.players.map(p => p.getPseudo()));
+                this.broadcast('players', {
+                    players: this.players.map(p => p.getPseudo()),
+                    pseudo: player.getPseudo(),
+                    type: 'connect'
+                });
             });
 
             socket.on('getGrid', () => {
@@ -62,7 +64,9 @@ export default class Server {
             });
 
             socket.on('pick', data => {
-                this.gameController.pick(data.row, data.col);
+                if (this.gameController.pick(data.row, data.col)) {
+                    this.broadcast('win', false);
+                }
                 this.broadcast('grid', this.gameController.getGrid());
             });
 
@@ -78,8 +82,13 @@ export default class Server {
             socket.on('disconnect', () => {
                 console.log(`Socket ${socket.id} disconnected !`);
                 this.sockets.delete(socket.id);
+                const player = this.players.find(p => p.getUuid() === socket.id);
                 this.players = this.players.filter(player => player.getUuid() !== socket.id);
-                this.broadcast('players', this.players.map(p => p.getPseudo()));
+                this.broadcast('players', {
+                    players: this.players.map(p => p.getPseudo()),
+                    pseudo: player ? player.getPseudo() : 'Un joueur',
+                    type: 'disconnect'
+                });
             })
         })
     }

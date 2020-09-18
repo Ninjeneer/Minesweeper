@@ -16,7 +16,7 @@
       <div class="col-12 col-sm-9 border p-3">
         <div class="row">
           <div class="col-12">
-            <div class="alert alert-success">Partie gagnée</div>
+            <div id="messagebox" class="alert">Partie gagnée</div>
             <p>Bombes restantes : {{ grid.length + grid[0].length }}</p>
           </div>
         </div>
@@ -44,6 +44,8 @@
 </template>
 
 <script>
+import MessageBoxManager from "../utils/MessageBoxManager";
+
 export default {
   name: "Game",
   props: {
@@ -52,6 +54,7 @@ export default {
   data: function () {
     return {
       cellSize: 40,
+      canPlay: true,
       grid: [
         [0, 0, 0, 0, 0, 0, 0, 0],
         [0, 0, 0, 0, 0, 0, 0, 0],
@@ -62,14 +65,18 @@ export default {
         [0, 0, 0, 0, 0, 0, 0, 0],
         [0, 0, 0, 0, 0, 0, 0, 0],
       ],
-      players: []
+      players: [],
     };
   },
   mounted: function () {
     this.$socket.emit("getGrid");
+    MessageBoxManager.init();
   },
   methods: {
     pickCell: function (cellNumber) {
+      if (!this.canPlay) {
+        return;
+      }
       const row = Math.floor(cellNumber / this.grid.length) + 1;
       const col = (cellNumber % this.grid.length) + 1;
 
@@ -79,13 +86,33 @@ export default {
       const answer = confirm("Voulez-vous vraiment réinitialiser la partie ?");
       if (answer) {
         this.$socket.emit("reset");
+        this.canPlay = true;
+        MessageBoxManager.hide();
       }
     },
   },
   socket: {
     events: {
-      players: function(data) {
-        this.players = data;
+      players: function (data) {
+        console.log(data);
+        this.players = data.players;
+        MessageBoxManager.info(
+          data.pseudo +
+            (data.type === "connect"
+              ? " a rejoint la partie !"
+              : " a quitté la partie !")
+        );
+        setTimeout(() => {
+          MessageBoxManager.hide();
+        }, 5000);
+      },
+      win: function (state) {
+        this.canPlay = false;
+        if (state) {
+          MessageBoxManager.info("Vous avez gagné la partie !");
+        } else {
+          MessageBoxManager.danger("Vous avez perdu la partie !");
+        }
       },
       grid: function (data) {
         console.log(data);
