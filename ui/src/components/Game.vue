@@ -22,7 +22,7 @@
         </div>
         <div class="row mb-5">
           <div class="col-12 mx-auto text-center">
-            <div class="grid mx-auto">
+            <div id="grid" class="grid mx-auto">
               <div
                 class="cell"
                 v-for="(cell, index) in [].concat(...grid)"
@@ -51,6 +51,7 @@ export default {
   },
   data: function () {
     return {
+      cellSize: 40,
       grid: [
         [0, 0, 0, 0, 0, 0, 0, 0],
         [0, 0, 0, 0, 0, 0, 0, 0],
@@ -63,6 +64,11 @@ export default {
       ],
     };
   },
+  mounted: function() {
+    const grid = document.getElementById('grid');
+    grid.style.gridTemplateColumns = `repeat(${this.grid.length}, ${this.cellSize}px)`;
+    grid.style.gridTemplateRows = `repeat(${this.grid.length}, ${this.cellSize}px)`;
+  },
   methods: {
     pickCell: function (cellNumber) {
       const row = Math.floor(cellNumber / this.grid.length);
@@ -71,6 +77,8 @@ export default {
       const cell = document.getElementById("cell-" + cellNumber);
       cell.innerText = this.grid[row][col];
       cell.classList.add("revealed");
+
+      this.$socket.emit('lol', 'coucou');
     },
     resetGame: function () {
       const answer = confirm("Voulez-vous vraiment réinitialiser la partie ?");
@@ -86,8 +94,6 @@ export default {
 
 .grid {
   display: grid;
-  grid-template-columns: repeat(8, 40px);
-  grid-template-rows: repeat(8, 40px);
   width: 80%;
   border: 1xp solid red;
 }

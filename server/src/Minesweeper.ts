@@ -22,10 +22,13 @@ export default class MineSweeper {
         this.generateGrid();
     }
 
-    public pick(row: number, col: number) {
+    public pick(row: number, col: number): boolean {
         // Avoid infinite recursive
         if (this.grid[row][col].visited) {
-            return;
+            return false;
+        }
+        if (this.grid[row][col].value === 'B') {
+            return true;
         }
         // Reveal cell
         this.playerGrid[row][col] = this.grid[row][col].value;
@@ -39,6 +42,7 @@ export default class MineSweeper {
                 }
             }
         }
+        return false;
     }
 
     public flag(row: number, col: number) {
