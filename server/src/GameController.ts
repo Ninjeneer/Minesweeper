@@ -1,4 +1,4 @@
-import MineSweeper from "./Minesweeper";
+import MineSweeper, { Cell } from "./Minesweeper";
 
 export default class GameController {
     private game: MineSweeper;
@@ -17,8 +17,26 @@ export default class GameController {
 
     public displayGrid() {
         console.log('--------')  
-        this.game.getPlayerGrid().forEach(line => {
-            console.log(line.join(' '));
+        this.game.getGrid().forEach(line => {
+            console.log(line.map(cell => cell.value).join(' '));
         })
+    }
+
+    public getGrid() {
+        const grid: Cell[][] = [];
+        this.game.getGrid().forEach(line => {
+            grid.push(line.filter(cell => cell.value !== '#'));
+        });
+        grid.pop();
+        grid.shift();
+        return grid;
+    }
+
+    public getPlayerGrid() {
+        return this.game.getPlayerGrid();
+    }
+
+    public resetGame(size: number, nbBombs: number) {
+        this.game = new MineSweeper(size, nbBombs)
     }
 }

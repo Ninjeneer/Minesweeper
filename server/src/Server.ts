@@ -2,7 +2,8 @@ import * as express from 'express';
 import * as http from 'http';
 import * as socketIo from 'socket.io';
 
-import {v4 as uuidv4} from 'uuid';
+import GameController from './GameController';
+import Player from './Player';
 
 const cors = require('cors');
 
@@ -12,10 +13,13 @@ export default class Server {
     private app;
     private server: http.Server;
     private io: socketIo.Server;
+    private gameController: GameController;
 
     private sockets: Map<string, socketIo.Socket> = new Map<string, socketIo.Socket>();
+    private players: Player[] = [];
 
-    constructor() {
+    constructor(gameController: GameController) {
+        this.gameController = gameController;
         this.app = express();
         this.app.use(cors());
         this.app.use(function(req, res, next) {
@@ -43,15 +47,46 @@ export default class Server {
 
     private startWebsocket() {
         this.io.on('connection', socket => {
-            const socketID = uuidv4();
-            this.sockets.set(socketID, socket);
-            console.log(`Socket ${socketID} connected !`);
-            
-            socket.on('message', data => {
-                console.log(data);
+            this.sockets.set(socket.id, socket);
+            console.log(`Socket ${socket.id} connected !`);
+
+            socket.on('register', data => {
+                const player = new Player(socket, data);
+                this.players.push(player);
+                console.log(`Player ${player.getPseudo()} registered !`)
+                this.broadcast('players', this.players.map(p => p.getPseudo()));
             });
 
-            socket.on('lol', data => console.log(data));
+            socket.on('getGrid', () => {
+                socket.emit('grid', this.gameController.getGrid());
+            });
+
+            socket.on('pick', data => {
+                this.gameController.pick(data.row, data.col);
+                this.broadcast('grid', this.gameController.getGrid());
+            });
+
+            socket.on('reset', () => {
+                this.gameController.resetGame(10, 5);
+                this.broadcast('grid', this.gameController.getGrid());
+            });
+
+            socket.on('getPlayers', () => {
+                socket.emit('players', this.players);
+            })
+
+            socket.on('disconnect', () => {
+                console.log(`Socket ${socket.id} disconnected !`);
+                this.sockets.delete(socket.id);
+                this.players = this.players.filter(player => player.getUuid() !== socket.id);
+                this.broadcast('players', this.players.map(p => p.getPseudo()));
+            })
+        })
+    }
+
+    private broadcast(event: string, ...args: any) {
+        this.sockets.forEach(socket => {
+            socket.emit(event, ...args);
         })
     }
 }

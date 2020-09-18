@@ -1,4 +1,4 @@
-interface Cell {
+export interface Cell {
     value: string;
     visited: boolean;
 }
@@ -27,13 +27,14 @@ export default class MineSweeper {
         if (this.grid[row][col].visited) {
             return false;
         }
+        // Mark as visited
+        this.grid[row][col].visited = true;
+        // Check bomb pick up
         if (this.grid[row][col].value === 'B') {
             return true;
         }
         // Reveal cell
         this.playerGrid[row][col] = this.grid[row][col].value;
-        // Mark as visited
-        this.grid[row][col].visited = true;
         // Visit siblings if 0
         if (this.grid[row][col].value === '0') {
             for (let i = row - 1; i <= row + 1; i++) {
@@ -50,7 +51,7 @@ export default class MineSweeper {
             throw new Error("Already visited");
         }
 
-        if(this.playerGrid[row][col] === '#') {
+        if (this.playerGrid[row][col] === '#') {
             // Flag cell as bomb and update remaining bombs
             this.playerGrid[row][col] = 'F';
             if (this.remainingBombs > 0) {

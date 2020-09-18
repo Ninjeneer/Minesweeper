@@ -10,7 +10,7 @@
       <div class="col-12 col-sm-3 border text-left">
         <p>Joueurs connectés :</p>
         <ul>
-          <li>loan</li>
+          <li v-for="(pseudo, index) in this.players" :key="index">{{ pseudo }}</li>
         </ul>
       </div>
       <div class="col-12 col-sm-9 border p-3">
@@ -26,7 +26,7 @@
               <div
                 class="cell"
                 v-for="(cell, index) in [].concat(...grid)"
-                :key="cell"
+                :key="index"
                 v-on:click="pickCell(index)"
                 v-bind:id="'cell-' + index"
               ></div>
@@ -62,26 +62,55 @@ export default {
         [0, 0, 0, 0, 0, 0, 0, 0],
         [0, 0, 0, 0, 0, 0, 0, 0],
       ],
+      players: []
     };
   },
-  mounted: function() {
-    const grid = document.getElementById('grid');
-    grid.style.gridTemplateColumns = `repeat(${this.grid.length}, ${this.cellSize}px)`;
-    grid.style.gridTemplateRows = `repeat(${this.grid.length}, ${this.cellSize}px)`;
+  mounted: function () {
+    this.$socket.emit("getGrid");
   },
   methods: {
     pickCell: function (cellNumber) {
-      const row = Math.floor(cellNumber / this.grid.length);
-      const col = cellNumber % this.grid.length;
+      const row = Math.floor(cellNumber / this.grid.length) + 1;
+      const col = (cellNumber % this.grid.length) + 1;
 
-      const cell = document.getElementById("cell-" + cellNumber);
-      cell.innerText = this.grid[row][col];
-      cell.classList.add("revealed");
-
-      this.$socket.emit('lol', 'coucou');
+      this.$socket.emit("pick", { row, col });
     },
     resetGame: function () {
       const answer = confirm("Voulez-vous vraiment réinitialiser la partie ?");
+      if (answer) {
+        this.$socket.emit("reset");
+      }
+    },
+  },
+  socket: {
+    events: {
+      players: function(data) {
+        this.players = data;
+      },
+      grid: function (data) {
+        console.log(data);
+        this.grid = data;
+        const grid = document.getElementById("grid");
+        grid.style.gridTemplateColumns = `repeat(${this.grid.length}, ${this.cellSize}px)`;
+        grid.style.gridTemplateRows = `repeat(${this.grid.length}, ${this.cellSize}px)`;
+
+        for (let row = 0; row < this.grid.length; row++) {
+          for (let col = 0; col < this.grid.length; col++) {
+            const DOMCell = document.getElementById(
+              "cell-" + (row * this.grid.length + col)
+            );
+            if (DOMCell) {
+              if (this.grid[row][col].visited) {
+                DOMCell.innerText = this.grid[row][col].value;
+                DOMCell.classList.add("revealed");
+              } else {
+                DOMCell.innerText = "";
+                DOMCell.classList.remove("revealed");
+              }
+            }
+          }
+        }
+      },
     },
   },
 };
