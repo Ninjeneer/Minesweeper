@@ -3,6 +3,12 @@ export interface Cell {
     visited: boolean;
 }
 
+export enum GameState {
+    WIN = 'win', 
+    LOST = 'lost', 
+    CONTINUE = 'continue'
+}
+
 export default class MineSweeper {
     private grid: Cell[][];
     private playerGrid: string[][];
@@ -22,16 +28,20 @@ export default class MineSweeper {
         this.generateGrid();
     }
 
-    public pick(row: number, col: number): boolean {
+    public pick(row: number, col: number): GameState {
         // Avoid infinite recursive
         if (this.grid[row][col].visited) {
-            return false;
+            return GameState.CONTINUE;
         }
         // Mark as visited
         this.grid[row][col].visited = true;
+        if (this.checkWin()) {
+            console.log('WIN')
+            return GameState.WIN;
+        }
         // Check bomb pick up
         if (this.grid[row][col].value === 'B') {
-            return true;
+            return GameState.LOST;
         }
         // Reveal cell
         this.playerGrid[row][col] = this.grid[row][col].value;
@@ -43,7 +53,19 @@ export default class MineSweeper {
                 }
             }
         }
-        return false;
+        return GameState.CONTINUE;
+    }
+
+    private checkWin(): boolean {
+        for (let i = 1; i < this.size - 1; i++) {
+            for (let j = 1; j < this.size - 1; j++) {
+                if (!this.grid[i][j].visited && this.grid[i][j].value !== 'B') {
+                    console.log("left value : " + i + " : "+ j);
+                    return false;
+                }
+            }
+        }
+        return true;
     }
 
     public flag(row: number, col: number) {
@@ -76,6 +98,10 @@ export default class MineSweeper {
 
     public getPlayerGrid() {
         return this.playerGrid;
+    }
+
+    public getRemainingBombs() {
+        return this.remainingBombs;
     }
 
     private generateGrid() {

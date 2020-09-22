@@ -1,4 +1,4 @@
-import MineSweeper, { Cell } from "./Minesweeper";
+import MineSweeper, { Cell, GameState } from "./Minesweeper";
 
 export default class GameController {
     private game: MineSweeper;
@@ -7,7 +7,15 @@ export default class GameController {
         this.game = new MineSweeper(size, nbBombs);
     }
 
-    public pick(row: number, col: number): boolean {
+    public pick(row: number, col: number): GameState {
+        if (row < 0 || row > this.game.getSize() || col < 0 || col > this.game.getSize()) {
+            throw new Error('Out of bounds');
+        }
+
+        return this.game.pick(row, col);
+    }
+
+    public flag(row: number, col: number): GameState {
         if (row < 0 || row > this.game.getSize() || col < 0 || col > this.game.getSize()) {
             throw new Error('Out of bounds');
         }
@@ -18,7 +26,7 @@ export default class GameController {
     public displayGrid() {
         console.log('--------')  
         this.game.getGrid().forEach(line => {
-            console.log(line.map(cell => cell.value).join(' '));
+            console.log(line.map(cell => cell.value + "|" + (cell.visited ? '1' : '0')).join(' '));
         })
     }
 
@@ -30,6 +38,10 @@ export default class GameController {
         grid.pop();
         grid.shift();
         return grid;
+    }
+
+    public getRemainingBombs() {
+        return this.game.getRemainingBombs();
     }
 
     public getPlayerGrid() {

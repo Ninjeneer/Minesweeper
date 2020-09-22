@@ -3,6 +3,7 @@ import * as http from 'http';
 import * as socketIo from 'socket.io';
 
 import GameController from './GameController';
+import { GameState } from './Minesweeper';
 import Player from './Player';
 
 const cors = require('cors');
@@ -60,19 +61,27 @@ export default class Server {
             });
 
             socket.on('getGrid', () => {
-                socket.emit('grid', this.gameController.getGrid());
+                socket.emit('grid', this.buildGridPayload());
             });
 
             socket.on('pick', data => {
-                if (this.gameController.pick(data.row, data.col)) {
+                const pick = this.gameController.pick(data.row, data.col);
+                if (pick === GameState.LOST) {
                     this.broadcast('win', false);
+                } else if (pick === GameState.WIN) {
+                    this.broadcast('win', true);
                 }
-                this.broadcast('grid', this.gameController.getGrid());
+                this.broadcast('grid', this.buildGridPayload());
             });
 
+            socket.on('flag', data => {
+                this.gameController.flag(data.row, data.col);
+                this.broadcast('grid', this.buildGridPayload());
+            })
+
             socket.on('reset', () => {
-                this.gameController.resetGame(10, 5);
-                this.broadcast('grid', this.gameController.getGrid());
+                this.gameController.resetGame(3, 5);
+                this.broadcast('grid', this.buildGridPayload());
             });
 
             socket.on('getPlayers', () => {
@@ -97,5 +106,13 @@ export default class Server {
         this.sockets.forEach(socket => {
             socket.emit(event, ...args);
         })
+    }
+
+    private buildGridPayload() {
+        return { 
+            grid: this.gameController.getGrid(), 
+            playerGrid: this.gameController.getPlayerGrid(),
+            remainingBombs: this.gameController.getRemainingBombs() 
+        };
     }
 }

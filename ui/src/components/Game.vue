@@ -28,6 +28,7 @@
                 v-for="(cell, index) in [].concat(...grid)"
                 :key="index"
                 v-on:click="pickCell(index)"
+                v-on:contextmenu="flag(index)"
                 v-bind:id="'cell-' + index"
               ></div>
             </div>
@@ -66,6 +67,7 @@ export default {
         [0, 0, 0, 0, 0, 0, 0, 0],
       ],
       players: [],
+      remainingBombs: 0
     };
   },
   mounted: function () {
@@ -74,6 +76,7 @@ export default {
   },
   methods: {
     pickCell: function (cellNumber) {
+      console.log('pick')
       if (!this.canPlay) {
         return;
       }
@@ -81,6 +84,13 @@ export default {
       const col = (cellNumber % this.grid.length) + 1;
 
       this.$socket.emit("pick", { row, col });
+    },
+    flag: function(cellNumber) {
+      console.log('flag');
+      const row = Math.floor(cellNumber / this.grid.length) + 1;
+      const col = (cellNumber % this.grid.length) + 1;
+
+      this.$socket.emit("flag", { row, col });
     },
     resetGame: function () {
       const answer = confirm("Voulez-vous vraiment réinitialiser la partie ?");
@@ -109,14 +119,17 @@ export default {
       win: function (state) {
         this.canPlay = false;
         if (state) {
-          MessageBoxManager.info("Vous avez gagné la partie !");
+          MessageBoxManager.success("Vous avez gagné la partie !");
         } else {
           MessageBoxManager.danger("Vous avez perdu la partie !");
         }
       },
       grid: function (data) {
-        console.log(data);
-        this.grid = data;
+        data.playerGrid.forEach(line => {
+          console.log(line.join(' '));
+        })
+        this.grid = data.grid;
+        this.remainingBombs = data.remainingBombs;
         const grid = document.getElementById("grid");
         grid.style.gridTemplateColumns = `repeat(${this.grid.length}, ${this.cellSize}px)`;
         grid.style.gridTemplateRows = `repeat(${this.grid.length}, ${this.cellSize}px)`;
@@ -130,9 +143,13 @@ export default {
               if (this.grid[row][col].visited) {
                 DOMCell.innerText = this.grid[row][col].value;
                 DOMCell.classList.add("revealed");
-              } else {
+              } else if(!this.grid[row][col].visited) {
                 DOMCell.innerText = "";
                 DOMCell.classList.remove("revealed");
+              } else if (data.playerGrid[row][col] === 'F') {
+                DOMCell.classList.add("flagged");
+                DOMCell.classList.remove("revealed");
+                DOMCell.innerText = "";
               }
             }
           }
@@ -176,5 +193,9 @@ export default {
 .revealed:hover {
   background-color: white;
   font-weight: bold;
+}
+
+.flagged {
+  background-color: red;
 }
 </style>
