@@ -98,7 +98,11 @@ export default class MineSweeper {
     }
 
     public getSize() {
-        return this.size;
+        return this.size - 2;
+    }
+
+    public getNbBombs() {
+        return this.nbBombs;
     }
 
     public getGrid() {

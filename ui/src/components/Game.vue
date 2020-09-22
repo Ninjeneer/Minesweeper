@@ -14,6 +14,16 @@
         </ul>
       </div>
       <div class="col-12 col-sm-9 border p-3">
+        <div class="form-row mb-5">
+          <div class="col-6">
+            <label for="nbBombForm">Taille de grille à la prochaine partie</label>
+            <input type="number" class="form-control" id="gridSizeForm" placeholder="Taille de côté" v-model="nextGridSize"/>
+          </div>
+          <div class="col-6">
+            <label for="nbBombForm">Nombre de bombes à la prochaine partie</label>
+            <input type="number" class="form-control" id="nbBombForm" placeholder="Nombre de bombes" v-model="nextBombAmount"/>
+          </div>
+        </div>
         <div class="row">
           <div class="col-12">
             <div id="messagebox" class="alert">Partie gagnée</div>
@@ -67,7 +77,9 @@ export default {
         [0, 0, 0, 0, 0, 0, 0, 0],
       ],
       players: [],
-      remainingBombs: 0
+      remainingBombs: 0,
+      nextGridSize: 0,
+      nextBombAmount: 0
     };
   },
   mounted: function () {
@@ -76,7 +88,6 @@ export default {
   },
   methods: {
     pickCell: function (cellNumber) {
-      console.log('pick')
       if (!this.canPlay) {
         return;
       }
@@ -85,9 +96,11 @@ export default {
 
       this.$socket.emit("pick", { row, col });
     },
-    flag: function(event, cellNumber) {
+    flag: function (event, cellNumber) {
       event.preventDefault();
-      console.log('flag');
+      if (!this.canPlay) {
+        return;
+      }
       const row = Math.floor(cellNumber / this.grid.length) + 1;
       const col = (cellNumber % this.grid.length) + 1;
 
@@ -96,7 +109,8 @@ export default {
     resetGame: function () {
       const answer = confirm("Voulez-vous vraiment réinitialiser la partie ?");
       if (answer) {
-        this.$socket.emit("reset");
+        console.log(this.nextGridSize + " : " + this.nbBombs)
+        this.$socket.emit("reset", { size: this.nextGridSize, nbBombs: this.nextBombAmount });
         this.canPlay = true;
         MessageBoxManager.hide();
       }
@@ -125,19 +139,24 @@ export default {
           MessageBoxManager.danger("Vous avez perdu la partie !");
         }
       },
-      error: function(message) {
+      error: function (message) {
         MessageBoxManager.danger(message);
         setTimeout(() => {
           MessageBoxManager.hide();
         }, 5000);
       },
+      reset: function () {
+        this.canPlay = true;
+      },
       grid: function (data) {
-        data.playerGrid.forEach(line => {
-          console.log(line.join(' '));
-        })
+        data.playerGrid.forEach((line) => {
+          console.log(line.join(" "));
+        });
         console.log(data);
         this.grid = data.playerGrid;
         this.remainingBombs = data.remainingBombs;
+        this.nextGridSize = data.size;
+        this.nextBombAmount = data.nbBombs;
         const grid = document.getElementById("grid");
         grid.style.gridTemplateColumns = `repeat(${this.grid.length}, ${this.cellSize}px)`;
         grid.style.gridTemplateRows = `repeat(${this.grid.length}, ${this.cellSize}px)`;
@@ -149,9 +168,9 @@ export default {
             );
             if (DOMCell) {
               console.log(data.playerGrid[row][col]);
-              if (data.playerGrid[row][col] === 'F') {
+              if (data.playerGrid[row][col] === "F") {
                 DOMCell.classList.add("flagged");
-              } else if (this.grid[row][col] === '#') {
+              } else if (this.grid[row][col] === "#") {
                 DOMCell.innerText = "";
                 DOMCell.classList.remove("revealed");
                 DOMCell.classList.remove("flagged");

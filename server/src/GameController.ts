@@ -59,4 +59,11 @@ export default class GameController {
     public resetGame(size: number, nbBombs: number) {
         this.game = new MineSweeper(size, nbBombs)
     }
+
+    public getGameProps() {
+        return {
+            size: this.game.getSize(),
+            nbBombs: this.game.getNbBombs()
+        };
+    }
 }

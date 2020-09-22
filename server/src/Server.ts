@@ -81,8 +81,9 @@ export default class Server {
                 this.gameController.displayGrid();
             })
 
-            socket.on('reset', () => {
-                this.gameController.resetGame(MineSweeper.DEFAULT_SIZE, 5);
+            socket.on('reset', data => {
+                console.log(JSON.stringify(data));
+                this.gameController.resetGame(+data.size, +data.nbBombs);
                 this.broadcast('grid', this.buildGridPayload());
             });
 
@@ -113,7 +114,9 @@ export default class Server {
     private buildGridPayload() {
         return {
             playerGrid: this.gameController.getPlayerGrid(),
-            remainingBombs: this.gameController.getRemainingBombs()
+            remainingBombs: this.gameController.getRemainingBombs(),
+            size: this.gameController.getGameProps().size,
+            nbBombs: this.gameController.getGameProps().nbBombs
         };
     }
 }
