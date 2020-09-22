@@ -2,8 +2,9 @@ import * as express from 'express';
 import * as http from 'http';
 import * as socketIo from 'socket.io';
 
+import MineSweeper, { GameState } from './Minesweeper';
+
 import GameController from './GameController';
-import { GameState } from './Minesweeper';
 import Player from './Player';
 
 const cors = require('cors');
@@ -77,10 +78,11 @@ export default class Server {
             socket.on('flag', data => {
                 this.gameController.flag(data.row, data.col);
                 this.broadcast('grid', this.buildGridPayload());
+                this.gameController.displayGrid();
             })
 
             socket.on('reset', () => {
-                this.gameController.resetGame(3, 5);
+                this.gameController.resetGame(MineSweeper.DEFAULT_SIZE, 5);
                 this.broadcast('grid', this.buildGridPayload());
             });
 
@@ -109,10 +111,9 @@ export default class Server {
     }
 
     private buildGridPayload() {
-        return { 
-            grid: this.gameController.getGrid(), 
+        return {
             playerGrid: this.gameController.getPlayerGrid(),
-            remainingBombs: this.gameController.getRemainingBombs() 
+            remainingBombs: this.gameController.getRemainingBombs()
         };
     }
 }

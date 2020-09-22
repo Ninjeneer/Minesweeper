@@ -17,7 +17,7 @@
         <div class="row">
           <div class="col-12">
             <div id="messagebox" class="alert">Partie gagnée</div>
-            <p>Bombes restantes : {{ grid.length + grid[0].length }}</p>
+            <p>Bombes restantes : {{ this.remainingBombs }}</p>
           </div>
         </div>
         <div class="row mb-5">
@@ -28,7 +28,7 @@
                 v-for="(cell, index) in [].concat(...grid)"
                 :key="index"
                 v-on:click="pickCell(index)"
-                v-on:contextmenu="flag(index)"
+                v-on:contextmenu="flag($event, index)"
                 v-bind:id="'cell-' + index"
               ></div>
             </div>
@@ -85,7 +85,8 @@ export default {
 
       this.$socket.emit("pick", { row, col });
     },
-    flag: function(cellNumber) {
+    flag: function(event, cellNumber) {
+      event.preventDefault();
       console.log('flag');
       const row = Math.floor(cellNumber / this.grid.length) + 1;
       const col = (cellNumber % this.grid.length) + 1;
@@ -124,11 +125,18 @@ export default {
           MessageBoxManager.danger("Vous avez perdu la partie !");
         }
       },
+      error: function(message) {
+        MessageBoxManager.danger(message);
+        setTimeout(() => {
+          MessageBoxManager.hide();
+        }, 5000);
+      },
       grid: function (data) {
         data.playerGrid.forEach(line => {
           console.log(line.join(' '));
         })
-        this.grid = data.grid;
+        console.log(data);
+        this.grid = data.playerGrid;
         this.remainingBombs = data.remainingBombs;
         const grid = document.getElementById("grid");
         grid.style.gridTemplateColumns = `repeat(${this.grid.length}, ${this.cellSize}px)`;
@@ -140,16 +148,17 @@ export default {
               "cell-" + (row * this.grid.length + col)
             );
             if (DOMCell) {
-              if (this.grid[row][col].visited) {
-                DOMCell.innerText = this.grid[row][col].value;
-                DOMCell.classList.add("revealed");
-              } else if(!this.grid[row][col].visited) {
-                DOMCell.innerText = "";
-                DOMCell.classList.remove("revealed");
-              } else if (data.playerGrid[row][col] === 'F') {
+              console.log(data.playerGrid[row][col]);
+              if (data.playerGrid[row][col] === 'F') {
                 DOMCell.classList.add("flagged");
-                DOMCell.classList.remove("revealed");
+              } else if (this.grid[row][col] === '#') {
                 DOMCell.innerText = "";
+                DOMCell.classList.remove("revealed");
+                DOMCell.classList.remove("flagged");
+              } else {
+                DOMCell.innerText = this.grid[row][col];
+                DOMCell.classList.add("revealed");
+                DOMCell.classList.remove("flagged");
               }
             }
           }
@@ -196,6 +205,6 @@ export default {
 }
 
 .flagged {
-  background-color: red;
+  background-color: red !important;
 }
 </style>

@@ -10,6 +10,8 @@ export enum GameState {
 }
 
 export default class MineSweeper {
+    public static DEFAULT_SIZE = 10;
+    
     private grid: Cell[][];
     private playerGrid: string[][];
     private size: number;
@@ -33,6 +35,7 @@ export default class MineSweeper {
         if (this.grid[row][col].visited) {
             return GameState.CONTINUE;
         }
+        
         // Mark as visited
         this.grid[row][col].visited = true;
         if (this.checkWin()) {
@@ -41,7 +44,13 @@ export default class MineSweeper {
         }
         // Check bomb pick up
         if (this.grid[row][col].value === 'B') {
+            // Reveal cell
+            this.playerGrid[row][col] = this.grid[row][col].value;
             return GameState.LOST;
+        }
+
+        if (this.playerGrid[row][col] === 'F') {
+            this.remainingBombs++;
         }
         // Reveal cell
         this.playerGrid[row][col] = this.grid[row][col].value;
@@ -70,7 +79,7 @@ export default class MineSweeper {
 
     public flag(row: number, col: number) {
         if (this.grid[row][col].visited) {
-            throw new Error("Already visited");
+            return;
         }
 
         if (this.playerGrid[row][col] === '#') {

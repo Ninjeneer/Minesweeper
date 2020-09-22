@@ -9,18 +9,18 @@ export default class GameController {
 
     public pick(row: number, col: number): GameState {
         if (row < 0 || row > this.game.getSize() || col < 0 || col > this.game.getSize()) {
-            throw new Error('Out of bounds');
+            return GameState.CONTINUE;
         }
 
         return this.game.pick(row, col);
     }
 
-    public flag(row: number, col: number): GameState {
+    public flag(row: number, col: number) {
         if (row < 0 || row > this.game.getSize() || col < 0 || col > this.game.getSize()) {
-            throw new Error('Out of bounds');
+            return GameState.CONTINUE;
         }
 
-        return this.game.pick(row, col);
+        this.game.flag(row, col);
     }
 
     public displayGrid() {
@@ -45,7 +45,15 @@ export default class GameController {
     }
 
     public getPlayerGrid() {
-        return this.game.getPlayerGrid();
+        const grid: string[][] = [];
+        for (let i = 1; i < this.game.getPlayerGrid().length - 1; i++) {
+            const row = [];
+            for (let j = 1; j < this.game.getPlayerGrid().length - 1; j++) {
+                row.push(this.game.getPlayerGrid()[i][j]);
+            }
+            grid.push(row);
+        }
+        return grid;
     }
 
     public resetGame(size: number, nbBombs: number) {
