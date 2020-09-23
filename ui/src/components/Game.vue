@@ -84,6 +84,7 @@ export default {
   },
   mounted: function () {
     this.$socket.emit("getGrid");
+    // this.$socket.emit("getPlayers");
     MessageBoxManager.init();
   },
   methods: {
