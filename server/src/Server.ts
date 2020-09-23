@@ -78,11 +78,9 @@ export default class Server {
             socket.on('flag', data => {
                 this.gameController.flag(data.row, data.col);
                 this.broadcast('grid', this.buildGridPayload());
-                this.gameController.displayGrid();
             })
 
             socket.on('reset', data => {
-                console.log(JSON.stringify(data));
                 this.gameController.resetGame(+data.size, +data.nbBombs);
                 this.broadcast('grid', this.buildGridPayload());
                 this.broadcast('reset');
