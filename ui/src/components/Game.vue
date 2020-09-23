@@ -17,11 +17,23 @@
         <div class="form-row mb-5">
           <div class="col-6">
             <label for="nbBombForm">Taille de grille à la prochaine partie</label>
-            <input type="number" class="form-control" id="gridSizeForm" placeholder="Taille de côté" v-model="nextGridSize"/>
+            <input
+              type="number"
+              class="form-control"
+              id="gridSizeForm"
+              placeholder="Taille de côté"
+              v-model="nextGridSize"
+            />
           </div>
           <div class="col-6">
             <label for="nbBombForm">Nombre de bombes à la prochaine partie</label>
-            <input type="number" class="form-control" id="nbBombForm" placeholder="Nombre de bombes" v-model="nextBombAmount"/>
+            <input
+              type="number"
+              class="form-control"
+              id="nbBombForm"
+              placeholder="Nombre de bombes"
+              v-model="nextBombAmount"
+            />
           </div>
         </div>
         <div class="row">
@@ -79,7 +91,7 @@ export default {
       players: [],
       remainingBombs: 0,
       nextGridSize: 0,
-      nextBombAmount: 0
+      nextBombAmount: 0,
     };
   },
   mounted: function () {
@@ -110,8 +122,11 @@ export default {
     resetGame: function () {
       const answer = confirm("Voulez-vous vraiment réinitialiser la partie ?");
       if (answer) {
-        console.log(this.nextGridSize + " : " + this.nbBombs)
-        this.$socket.emit("reset", { size: this.nextGridSize, nbBombs: this.nextBombAmount });
+        console.log(this.nextGridSize + " : " + this.nbBombs);
+        this.$socket.emit("reset", {
+          size: this.nextGridSize,
+          nbBombs: this.nextBombAmount,
+        });
         this.canPlay = true;
         MessageBoxManager.hide();
       }
@@ -148,6 +163,7 @@ export default {
       },
       reset: function () {
         this.canPlay = true;
+        MessageBoxManager.hide();
       },
       grid: function (data) {
         data.playerGrid.forEach((line) => {
