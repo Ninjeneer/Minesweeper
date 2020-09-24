@@ -66,6 +66,9 @@ export default class MineSweeper {
                     this.pick(i, j, player);
                 }
             }
+        } else {
+            // Update player score
+            player.increaseScore();
         }
         if (this.checkWin()) {
             return GameState.WIN;

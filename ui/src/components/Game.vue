@@ -13,7 +13,7 @@
           <li 
           v-for="(player, index) in this.players" 
           :key="index"
-          :style="{'color': player.color }">{{ player.pseudo }}</li>
+          :style="{'color': player.color }">{{ player.pseudo }} - {{ player.score }}</li>
         </ul>
       </div>
       <div class="col-12 col-sm-9 border p-3">
@@ -56,6 +56,7 @@
                 v-on:contextmenu="flag($event, index)"
                 v-bind:id="'cell-' + index"
                 :style="{'color': cell.player ? cell.player.color : 'black'}"
+                :title="cell.player ? cell.player.pseudo : undefined"
               ></div>
             </div>
           </div>
@@ -100,7 +101,6 @@ export default {
   },
   mounted: function () {
     this.$socket.emit("getGrid");
-    // this.$socket.emit("getPlayers");
     MessageBoxManager.init();
   },
   methods: {
@@ -173,11 +173,11 @@ export default {
         data.playerGrid.forEach((line) => {
           console.log(line.map(cell => "[" + cell.value + "|" + cell.visited + "]").join(" "));
         });
-        console.log(data);
         this.grid = data.playerGrid;
         this.remainingBombs = data.remainingBombs;
         this.nextGridSize = data.size;
         this.nextBombAmount = data.nbBombs;
+        this.players = data.players;
         const grid = document.getElementById("grid");
         grid.style.gridTemplateColumns = `repeat(${this.grid.length}, ${this.cellSize}px)`;
         grid.style.gridTemplateRows = `repeat(${this.grid.length}, ${this.cellSize}px)`;
@@ -188,7 +188,6 @@ export default {
               "cell-" + (row * this.grid.length + col)
             );
             if (DOMCell) {
-              console.log(data.playerGrid[row][col]);
               if (data.playerGrid[row][col].value === "F") {
                 DOMCell.classList.add("flagged");
               } else if (this.grid[row][col].value === "#") {

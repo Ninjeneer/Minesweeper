@@ -4,6 +4,7 @@ import Player from "./Player";
 
 export default class GameController {
     private game: MineSweeper;
+    private players: Player[] = [];
 
     constructor(size: number, nbBombs: number) {
         this.game = new MineSweeper(size, nbBombs);
@@ -67,5 +68,23 @@ export default class GameController {
             size: this.game.getSize(),
             nbBombs: this.game.getNbBombs()
         };
+    }
+
+    public getPlayers() {
+        return this.players;
+    }
+
+    public addPlayer(id: string, pseudo: string) {
+        const p = new Player(id, pseudo);
+        this.players.push(p);
+        return p;
+    }
+
+    public removePlayer(id: string) {
+        this.players = this.players.filter(player => player.getUuid() !== id);
+    }
+
+    public resetPlayerScores() {
+        this.players.forEach(player => player.resetScore());
     }
 }

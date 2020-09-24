@@ -16,7 +16,6 @@ export default class Server {
     private gameController: GameController;
 
     private sockets: Map<string, socketIo.Socket> = new Map<string, socketIo.Socket>();
-    private players: Player[] = [];
 
     constructor(gameController: GameController) {
         this.gameController = gameController;
@@ -51,22 +50,21 @@ export default class Server {
             console.log(`Socket ${socket.id} connected !`);
 
             socket.on('register', data => {
-                const player = new Player(socket, data);
-                this.players.push(player);
+                const player = this.gameController.addPlayer(socket.id, data);
                 console.log(`Player ${player.getPseudo()} registered !`)
                 this.broadcast('players', {
-                    players: this.players,
+                    players: this.gameController.getPlayers(),
                     pseudo: player.getPseudo(),
                     type: 'connect'
                 });
             });
 
             socket.on('getGrid', () => {
-                socket.emit('grid', this.buildGridPayload());
+                socket.emit('grid', this.buildGamePayload());
             });
 
             socket.on('pick', data => {
-                const player = this.players.find(p => p.getUuid() === socket.id);
+                const player = this.gameController.getPlayers().find(p => p.getUuid() === socket.id);
                 if (!player) {
                     return;
                 }
@@ -76,31 +74,32 @@ export default class Server {
                 } else if (pick === GameState.WIN) {
                     this.broadcast('win', true);
                 }
-                this.broadcast('grid', this.buildGridPayload());
+                this.broadcast('grid', this.buildGamePayload());
             });
 
             socket.on('flag', data => {
                 this.gameController.flag(data.row, data.col);
-                this.broadcast('grid', this.buildGridPayload());
+                this.broadcast('grid', this.buildGamePayload());
             })
 
             socket.on('reset', data => {
                 this.gameController.resetGame(+data.size, +data.nbBombs);
-                this.broadcast('grid', this.buildGridPayload());
+                this.gameController.resetPlayerScores();
+                this.broadcast('grid', this.buildGamePayload());
                 this.broadcast('reset');
             });
 
             socket.on('getPlayers', () => {
-                socket.emit('players', this.players);
+                socket.emit('players', this.gameController.getPlayers());
             })
 
             socket.on('disconnect', () => {
                 console.log(`Socket ${socket.id} disconnected !`);
                 this.sockets.delete(socket.id);
-                const player = this.players.find(p => p.getUuid() === socket.id);
-                this.players = this.players.filter(player => player.getUuid() !== socket.id);
+                const player = this.gameController.getPlayers().find(p => p.getUuid() === socket.id);
+                this.gameController.removePlayer(socket.id);
                 this.broadcast('players', {
-                    players: this.players.map(p => p.getPseudo()),
+                    players: this.gameController.getPlayers(),
                     pseudo: player ? player.getPseudo() : 'Un joueur',
                     type: 'disconnect'
                 });
@@ -114,12 +113,13 @@ export default class Server {
         })
     }
 
-    private buildGridPayload() {
+    private buildGamePayload() {
         return {
             playerGrid: this.gameController.getPlayerGrid(),
             remainingBombs: this.gameController.getRemainingBombs(),
             size: this.gameController.getGameProps().size,
-            nbBombs: this.gameController.getGameProps().nbBombs
+            nbBombs: this.gameController.getGameProps().nbBombs,
+            players: this.gameController.getPlayers()
         };
     }
 }
