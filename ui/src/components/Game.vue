@@ -10,7 +10,10 @@
       <div class="col-12 col-sm-3 border text-left">
         <p>Joueurs connectés :</p>
         <ul>
-          <li v-for="(pseudo, index) in this.players" :key="index">{{ pseudo }}</li>
+          <li 
+          v-for="(player, index) in this.players" 
+          :key="index"
+          :style="{'color': player.color }">{{ player.pseudo }}</li>
         </ul>
       </div>
       <div class="col-12 col-sm-9 border p-3">
@@ -40,6 +43,7 @@
                 v-on:click="pickCell(index)"
                 v-on:contextmenu="flag($event, index)"
                 v-bind:id="'cell-' + index"
+                :style="{'color': cell.player ? cell.player.color : 'black'}"
               ></div>
             </div>
           </div>
@@ -151,7 +155,7 @@ export default {
       },
       grid: function (data) {
         data.playerGrid.forEach((line) => {
-          console.log(line.join(" "));
+          console.log(line.map(cell => "[" + cell.value + "|" + cell.visited + "]").join(" "));
         });
         console.log(data);
         this.grid = data.playerGrid;
@@ -169,14 +173,14 @@ export default {
             );
             if (DOMCell) {
               console.log(data.playerGrid[row][col]);
-              if (data.playerGrid[row][col] === "F") {
+              if (data.playerGrid[row][col].value === "F") {
                 DOMCell.classList.add("flagged");
-              } else if (this.grid[row][col] === "#") {
+              } else if (this.grid[row][col].value === "#") {
                 DOMCell.innerText = "";
                 DOMCell.classList.remove("revealed");
                 DOMCell.classList.remove("flagged");
               } else {
-                DOMCell.innerText = this.grid[row][col];
+                DOMCell.innerText = this.grid[row][col].value;
                 DOMCell.classList.add("revealed");
                 DOMCell.classList.remove("flagged");
               }

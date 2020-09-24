@@ -1,6 +1,9 @@
+import Player from "./Player";
+
 export interface Cell {
     value: string;
     visited: boolean;
+    player?: Player;
 }
 
 export enum GameState {
@@ -13,7 +16,7 @@ export default class MineSweeper {
     public static DEFAULT_SIZE = 10;
     
     private grid: Cell[][];
-    private playerGrid: string[][];
+    private playerGrid: Cell[][];
     private size: number;
     private nbBombs: number;
     private remainingBombs: number;
@@ -30,7 +33,7 @@ export default class MineSweeper {
         this.generateGrid();
     }
 
-    public pick(row: number, col: number): GameState {
+    public pick(row: number, col: number, player: Player): GameState {
         // Avoid infinite recursive
         if (this.grid[row][col].visited) {
             return GameState.CONTINUE;
@@ -38,29 +41,34 @@ export default class MineSweeper {
         
         // Mark as visited
         this.grid[row][col].visited = true;
-        if (this.checkWin()) {
-            console.log('WIN')
-            return GameState.WIN;
-        }
+        // Set associated player
+        this.grid[row][col].player = player;
+        
         // Check bomb pick up
         if (this.grid[row][col].value === 'B') {
             // Reveal cell
-            this.playerGrid[row][col] = this.grid[row][col].value;
+            this.playerGrid[row][col] = this.grid[row][col];
             return GameState.LOST;
         }
 
-        if (this.playerGrid[row][col] === 'F') {
+        if (this.playerGrid[row][col].value === 'F') {
             this.remainingBombs++;
         }
         // Reveal cell
-        this.playerGrid[row][col] = this.grid[row][col].value;
+        this.playerGrid[row][col] = this.grid[row][col];
         // Visit siblings if 0
         if (this.grid[row][col].value === '0') {
             for (let i = row - 1; i <= row + 1; i++) {
                 for (let j = col - 1; j <= col + 1; j++) {
-                    this.pick(i, j);
+                    if (i == row && j == col) {
+                        continue;
+                    }
+                    this.pick(i, j, player);
                 }
             }
+        }
+        if (this.checkWin()) {
+            return GameState.WIN;
         }
         return GameState.CONTINUE;
     }
@@ -69,7 +77,6 @@ export default class MineSweeper {
         for (let i = 1; i < this.size - 1; i++) {
             for (let j = 1; j < this.size - 1; j++) {
                 if (!this.grid[i][j].visited && this.grid[i][j].value !== 'B') {
-                    console.log("left value : " + i + " : "+ j);
                     return false;
                 }
             }
@@ -82,15 +89,15 @@ export default class MineSweeper {
             return;
         }
 
-        if (this.playerGrid[row][col] === '#') {
+        if (this.playerGrid[row][col].value === '#') {
             // Flag cell as bomb and update remaining bombs
-            this.playerGrid[row][col] = 'F';
+            this.playerGrid[row][col].value = 'F';
             if (this.remainingBombs > 0) {
                 this.remainingBombs--;
             }
         } else {
             // Unflag cell and update remaining bombs
-            this.playerGrid[row][col] = '#';
+            this.playerGrid[row][col].value = '#';
             if (this.remainingBombs < this.nbBombs) {
                 this.remainingBombs++;
             }
@@ -125,7 +132,7 @@ export default class MineSweeper {
                 row.push({ value: '#', visited: false });
             }
             this.grid.push(row);
-            this.playerGrid.push(row.map(cell => cell.value));
+            this.playerGrid.push(row.map(c => Object.assign({}, c)));
         }
 
         // Place bombs

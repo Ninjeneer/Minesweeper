@@ -1,5 +1,7 @@
 import MineSweeper, { Cell, GameState } from "./Minesweeper";
 
+import Player from "./Player";
+
 export default class GameController {
     private game: MineSweeper;
 
@@ -7,12 +9,12 @@ export default class GameController {
         this.game = new MineSweeper(size, nbBombs);
     }
 
-    public pick(row: number, col: number): GameState {
+    public pick(row: number, col: number, player: Player): GameState {
         if (row < 0 || row > this.game.getSize() || col < 0 || col > this.game.getSize()) {
             return GameState.CONTINUE;
         }
 
-        return this.game.pick(row, col);
+        return this.game.pick(row, col, player);
     }
 
     public flag(row: number, col: number) {
@@ -45,7 +47,7 @@ export default class GameController {
     }
 
     public getPlayerGrid() {
-        const grid: string[][] = [];
+        const grid: Cell[][] = [];
         for (let i = 1; i < this.game.getPlayerGrid().length - 1; i++) {
             const row = [];
             for (let j = 1; j < this.game.getPlayerGrid().length - 1; j++) {

@@ -55,7 +55,7 @@ export default class Server {
                 this.players.push(player);
                 console.log(`Player ${player.getPseudo()} registered !`)
                 this.broadcast('players', {
-                    players: this.players.map(p => p.getPseudo()),
+                    players: this.players,
                     pseudo: player.getPseudo(),
                     type: 'connect'
                 });
@@ -66,7 +66,11 @@ export default class Server {
             });
 
             socket.on('pick', data => {
-                const pick = this.gameController.pick(data.row, data.col);
+                const player = this.players.find(p => p.getUuid() === socket.id);
+                if (!player) {
+                    return;
+                }
+                const pick = this.gameController.pick(data.row, data.col, player);
                 if (pick === GameState.LOST) {
                     this.broadcast('win', false);
                 } else if (pick === GameState.WIN) {
