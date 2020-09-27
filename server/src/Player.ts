@@ -1,7 +1,3 @@
-import * as socketIo from 'socket.io';
-
-import { v4 as uuidv4 } from 'uuid';
-
 export default class Player {
     private static usedColors: string[] = [];
     private uuid: string;

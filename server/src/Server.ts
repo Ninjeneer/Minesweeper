@@ -2,10 +2,8 @@ import * as express from 'express';
 import * as http from 'http';
 import * as socketIo from 'socket.io';
 
-import MineSweeper, { GameState } from './Minesweeper';
-
+import { GameState } from './Minesweeper';
 import GameController from './GameController';
-import Player from './Player';
 
 const cors = require('cors');
 
@@ -91,7 +89,7 @@ export default class Server {
 
             socket.on('getPlayers', () => {
                 socket.emit('players', this.gameController.getPlayers());
-            })
+            });
 
             socket.on('disconnect', () => {
                 console.log(`Socket ${socket.id} disconnected !`);
@@ -103,8 +101,8 @@ export default class Server {
                     pseudo: player ? player.getPseudo() : 'Un joueur',
                     type: 'disconnect'
                 });
-            })
-        })
+            });
+        });
     }
 
     private broadcast(event: string, ...args: any) {

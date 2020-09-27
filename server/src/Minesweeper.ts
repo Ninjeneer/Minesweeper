@@ -7,14 +7,14 @@ export interface Cell {
 }
 
 export enum GameState {
-    WIN = 'win', 
-    LOST = 'lost', 
+    WIN = 'win',
+    LOST = 'lost',
     CONTINUE = 'continue'
 }
 
 export default class MineSweeper {
     public static DEFAULT_SIZE = 10;
-    
+
     private grid: Cell[][];
     private playerGrid: Cell[][];
     private size: number;
@@ -38,12 +38,12 @@ export default class MineSweeper {
         if (this.grid[row][col].visited) {
             return GameState.CONTINUE;
         }
-        
+
         // Mark as visited
         this.grid[row][col].visited = true;
         // Set associated player
         this.grid[row][col].player = player;
-        
+
         // Check bomb pick up
         if (this.grid[row][col].value === 'B') {
             // Reveal cell
@@ -66,7 +66,7 @@ export default class MineSweeper {
                     this.pick(i, j, player);
                 }
             }
-        } else {
+        } else if (this.grid[row][col].value !== '#') {
             // Update player score
             player.increaseScore();
         }

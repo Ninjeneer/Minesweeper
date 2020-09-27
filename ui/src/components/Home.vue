@@ -2,7 +2,11 @@
   <div id="home" class="row">
     <div class="col-6 offset-3 jumbotron align-center">
       <h1 class>Entrez votre pseudo</h1>
-      <input class="form-control mb-3" placeholder="Pseudonyme" v-model="pseudo"/>
+      <input
+        class="form-control mb-3"
+        placeholder="Pseudonyme"
+        v-model="pseudo"
+      />
       <button class="w-100 btn btn-success" v-on:click="register">Go</button>
     </div>
   </div>
@@ -11,22 +15,21 @@
 <script>
 export default {
   name: "Home",
-  data: function() {
+  data: function () {
     return {
-      pseudo: ''
-    }
+      pseudo: "",
+    };
   },
   methods: {
     register: function () {
-      this.$emit('register', this.pseudo);
-      console.log('emit ' + this.pseudo);
+      this.$emit("register", this.pseudo);
     },
   },
 };
 </script>
 
 <style>
-  #home {
-    margin-top: 60px;
-  }
+#home {
+  margin-top: 60px;
+}
 </style>
