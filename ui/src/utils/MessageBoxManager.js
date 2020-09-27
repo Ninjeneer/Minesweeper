@@ -11,21 +11,21 @@ export default class MessageBoxManager {
         this.clear();
         this.show();
         this.msgBox.classList.add("alert", "alert-info");
-        this.msgBox.innerText = msg;
+        this.msgBox.innerHTML = msg;
     }
 
     static success(msg) {
         this.clear();
         this.show();
         this.msgBox.classList.add("alert", "alert-success");
-        this.msgBox.innerText = msg;
+        this.msgBox.innerHTML = msg;
     }
 
     static danger(msg) {
         this.clear();
         this.show();
         this.msgBox.classList.add("alert", "alert-danger");
-        this.msgBox.innerText = msg;
+        this.msgBox.innerHTML = msg;
     }
 
     static show() {

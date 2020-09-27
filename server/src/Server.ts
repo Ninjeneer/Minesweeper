@@ -68,9 +68,9 @@ export default class Server {
                 }
                 const pick = this.gameController.pick(data.row, data.col, player);
                 if (pick === GameState.LOST) {
-                    this.broadcast('win', false);
+                    this.broadcast('win', { win: false, player: player });
                 } else if (pick === GameState.WIN) {
-                    this.broadcast('win', true);
+                    this.broadcast('win', { win: true, player: player });
                 }
                 this.broadcast('grid', this.buildGamePayload());
             });

@@ -114,12 +114,16 @@ export default {
           MessageBoxManager.hide();
         }, 5000);
       },
-      win: function (state) {
+      win: function (data) {
         this.canPlay = false;
-        if (state) {
-          MessageBoxManager.success("Vous avez gagné la partie !");
+        if (data.win) {
+          MessageBoxManager.success(
+            `<b>${data.player.pseudo}</b> a fait gagner la partie !`
+          );
         } else {
-          MessageBoxManager.danger("Vous avez perdu la partie !");
+          MessageBoxManager.danger(
+            `<b>${data.player.pseudo}</b> a fait perdre la partie !`
+          );
         }
       },
       error: function (message) {

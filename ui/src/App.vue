@@ -1,27 +1,24 @@
 <template>
   <div id="app" class="container-fluid">
-    <!-- <Home v-on:register="register" v-if="this.pseudo === ''" /> -->
-    <Game :pseudo="this.pseudo" />
+    <Home v-on:register="register" v-if="this.pseudo === ''" />
+    <Game v-else :pseudo="this.pseudo" />
   </div>
 </template>
 
 <script>
 import Game from "./components/game/Game";
-// import Home from "./components/Home";
+import Home from "./components/Home";
 
 export default {
   name: "App",
   components: {
-    // Home,
+    Home,
     Game,
   },
   data: function () {
     return {
-      pseudo: "Loan",
+      pseudo: "",
     };
-  },
-  mounted: function () {
-    this.$socket.emit("register", this.pseudo);
   },
   methods: {
     register: function (pseudo) {
