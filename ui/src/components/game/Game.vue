@@ -137,7 +137,9 @@ export default {
         this.remainingBombs = data.remainingBombs;
         this.nextGridSize = data.size;
         this.nextBombAmount = data.nbBombs;
-        this.players = data.players;
+        this.players = data.players.sort((a, b) =>
+          a.score < b.score ? 1 : a.score > b.score ? -1 : 0
+        );
         const grid = document.getElementById("grid");
         grid.style.gridTemplateColumns = `repeat(${this.grid.length}, ${this.cellSize}px)`;
         grid.style.gridTemplateRows = `repeat(${this.grid.length}, ${this.cellSize}px)`;
